@@ -57,17 +57,15 @@ sqlite_f = 'pycontrol.sqlite'
 # Comandos para ejecutar en las maquinas remotas
 commands=('ps ax', 'ls -a')
 
-''' Declaracion de funciones. '''
 def func_verbose():
 	""" 
-	Cuando se ejecuta este script con la opcion -v genera la salida completa de los
+	Cuando se ejecuta con la opcion -v genera la salida completa de los
 	comandos a ejecutar, en caso contrario solo los print
 	"""
 	for line in stdout:
 		print 'ssh-> ' + line.strip('\n')
 
 def usage():
-	""" Muestra informacion y ayuda de ejecucion """
 	print '%s %s' % (os.path.basename(sys.argv[0]),copyright)
 	print 'Usage: %s -f[--file] -h[--help] -v[--verbose]'  % os.path.basename(sys.argv[0])
 	sys.exit(0)
@@ -97,11 +95,9 @@ def files_check():
 		dbConnect.commit()
 		print 'listo.\n'
 
-''' Opciones '''
 try:
 	opts, args = getopt.getopt(sys.argv[1:], "hf:v", ["help", "file="])
 except getopt.GetoptError:
-	''' Muestra informacion y sale: '''
 	usage()
 	sys.exit(1)
 for o, a in opts:
@@ -123,21 +119,16 @@ for ip in open(ips_f).readlines():
 	''' Cuenta el numero de direcciones en el archivo '''
 	ip_count += 1
 	ip = ip.replace('\n', '')
-	''' Se verifica el nro de octetos y que sean numeros,
-	    TODO: verificar que el rango de cada octeto sea de 1-254 '''
 	if re.match("^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", ip):
 		try:
 			print '--> Conectando a %s...' % ip
 			client = paramiko.SSHClient()
 			client.set_missing_host_key_policy(AutoAddPolicy())
 			client.connect(ip, port=client_port, timeout=5, username=client_user, password=client_password)
-			''' Almacena la ip en listas y se cuenta el error para generar informacion de estado.
-			    python no llega a este seccion del programa si hay una exception '''
 			host_found.append(ip)
 			sql.execute("INSERT INTO host_f values ('%s')" % ip) 
 			dbConnect.commit()
 			
-			''' Seccion de ejecucion de comandos '''
 			for x in enumerate(commands):
 				print '----> Ejecutando comando Nro. %s: %s' % (x[0], x[1])
 				stdin, stdout, stderr = client.exec_command(x[1])
